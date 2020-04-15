@@ -21,7 +21,7 @@ public class Lab4_xml {
     private ArrayList<BorrowedBy> borrowedByArrayList = new ArrayList<BorrowedBy>();
     private static final DateFormat XML_DATE_FORMAT = new SimpleDateFormat("MM/dd/yyyy");
     private static final DateFormat SQL_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
-    private static final String NOT_AVAILABLE_VALUE = "N/A/";
+    private static final String NOT_AVAILABLE_VALUE = "N/A";
 
     public void readXML(String fileName)
     {
@@ -63,6 +63,7 @@ public class Lab4_xml {
                     NodeList cod = codElmnt.getChildNodes();
                     //System.out.println("Checkout_date : "  + ((Node) cod.item(0)).getNodeValue().trim());
                     String xml_checkout_date = ((Node) cod.item(0)).getNodeValue().trim();
+                    System.out.println("Checkout_date : "  + xml_checkout_date);
 
                     if (!xml_checkout_date.equals(NOT_AVAILABLE_VALUE)) {
                         Date date_checkout = XML_DATE_FORMAT.parse(xml_checkout_date);
@@ -76,6 +77,7 @@ public class Lab4_xml {
                     NodeList cid = cidElmnt.getChildNodes();
                     //System.out.println("Checkin_date : "  + ((Node) cid.item(0)).getNodeValue().trim());
                     String xml_checkin_date = ((Node) cid.item(0)).getNodeValue().trim();
+                    System.out.println("Checkin_date : "  + xml_checkin_date);
 
                     if (!xml_checkin_date.equals(NOT_AVAILABLE_VALUE)) {
                         Date date_checkin = XML_DATE_FORMAT.parse(xml_checkin_date);

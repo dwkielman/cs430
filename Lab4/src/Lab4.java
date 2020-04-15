@@ -13,7 +13,8 @@ import java.util.ArrayList;
 
 public class Lab4 {
 
-    private static final String NOT_AVAILABLE_VALUE = "N/A/";
+    private static final String NOT_AVAILABLE_VALUE = "N/A";
+    private static final String GET_BORROW_BY_CONTENTS = "select * from BorrowedBy;";
 
     public static void main(String args[]){
 
@@ -24,19 +25,83 @@ public class Lab4 {
 
             // 	read in and parse the activity file in XML format
             try {
+                System.out.println(("Program beginning: BorrowedBy content at start of application:"));
+
+                Statement stmt;
+                ResultSet rs;
+
+                // Get a Statement object
+                stmt = connection.createStatement();
+
+                // see if the book is checked out already
+                rs = stmt.executeQuery(GET_BORROW_BY_CONTENTS);
+
+                int borrowedCountBefore = 0;
+                ResultSetMetaData attributeNames = rs.getMetaData();
+                int columnsNumber = attributeNames.getColumnCount();
+                while (rs.next()) {
+                    for (int i = 1; i <= columnsNumber; i++) {
+                        /*
+                        if (i > 1) {
+                            System.out.print(",  ");
+                        }
+
+                        String columnValue = rs.getString(i);
+                        System.out.print(attributeNames.getColumnName(i) + " : " + columnValue);
+                        */
+                        borrowedCountBefore++;
+                    }
+                    System.out.println();
+                }
+
+                System.out.println(("Program beginning: BorrowedBy content at start of application: " + borrowedCountBefore));
+
+
                 Lab4_xml showXML = new Lab4_xml();
                 showXML.readXML ("/s/bach/a/class/cs430dl/Current/more_assignments/LabData/Libdata.xml");
                 ArrayList<BorrowedBy> borrowedByList = showXML.getBorrowedByArrayList();
 
                 for (BorrowedBy bb : borrowedByList) {
                     // 	If the transaction is a checkin, simply update the corresponding record appropriately
+                    System.out.println(("Check in date value: " + bb.getCheckin_date()));
                     if (!bb.getCheckin_date().equals(NOT_AVAILABLE_VALUE)) {
+                        System.out.println(("Checking in book."));
                         checkInBook(connection, bb);
                     } else {
                         //  If the transaction is a checkout, a new record is created
+                        System.out.println(("Checking out book."));
                         checkOutBook(connection, bb);
                     }
                 }
+
+                System.out.println(("Program finished: BorrowedBy content at start of application:"));
+
+                // Get a Statement object
+                stmt = connection.createStatement();
+
+                // see if the book is checked out already
+                rs = stmt.executeQuery(GET_BORROW_BY_CONTENTS);
+
+                int borrowedCountAfter = 0;
+                attributeNames = rs.getMetaData();
+                columnsNumber = attributeNames.getColumnCount();
+                while (rs.next()) {
+                    for (int i = 1; i <= columnsNumber; i++) {
+                        /*
+                        if (i > 1) {
+                            System.out.print(",  ");
+                        }
+
+                        String columnValue = rs.getString(i);
+                        System.out.print(attributeNames.getColumnName(i) + " : " + columnValue);
+
+                         */
+                        borrowedCountAfter++;
+                    }
+                    System.out.println();
+                }
+
+                System.out.println(("Program beginning: BorrowedBy content at start of application: " + borrowedCountAfter));
 
             }catch( Exception e ) {
                 e.printStackTrace();
@@ -52,9 +117,6 @@ public class Lab4 {
         Connection con = null;
 
         try {
-            Statement stmt;
-            ResultSet rs;
-
             // Register the JDBC driver for MySQL.
             Class.forName("com.mysql.jdbc.Driver");
 
@@ -125,10 +187,12 @@ public class Lab4 {
                     totalCopies += rs.getInt("total");
                 }
 
+                System.out.println("The book with the ISBN " + borrowedBy.getIsbn() + " has " + totalCopies + " available.");
+
                 if (totalCopies > 0) {
                     // Get a Statement object
                     stmt = connection.createStatement();
-                    stmt.executeUpdate("INSERT INTO BorrowedBy VALUES ('" + borrowedBy.getIsbn() + "', '" + borrowedBy.getMember_id() + "', '" + borrowedBy.getCheckout_date() + "', '9999-01-01';");
+                    stmt.executeUpdate("INSERT INTO BorrowedBy VALUES ('" + borrowedBy.getIsbn() + "', '" + borrowedBy.getMember_id() + "', '" + borrowedBy.getCheckout_date() + "', '9999-01-01');");
 
                     System.out.println("The book with the ISBN " + borrowedBy.getIsbn() + " is now checked out");
                 } else {
