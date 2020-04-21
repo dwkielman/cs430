@@ -1,20 +1,9 @@
 import java.sql.*;
 import java.util.ArrayList;
 
-// Everytime your program adds or modifies a record in a table, it should print an message to the screen to that effect. If an error is encountered, you should print a message to the screen to the specifics of the error and continue processing
-
-// You will need to implement code to check that the book being checked out exists in a library, and that a book being checked in has a corresponding checkout record
-
-// Once you have finished loading the data for the day's activities, run the following queries
-// Print the contents of the Borrowed_by table
-// For each member that has a book checked out (Last name, first name, member id), print a list of the book titles currently checked out
-
-
-
 public class Lab4 {
 
     private static final String NOT_AVAILABLE_VALUE = "N/A";
-    private static final String GET_BORROW_BY_CONTENTS = "select * from BorrowedBy;";
 
     public static void main(String args[]){
 
@@ -25,45 +14,13 @@ public class Lab4 {
 
             // 	read in and parse the activity file in XML format
             try {
-                System.out.println(("Program beginning: BorrowedBy content at start of application:"));
-
-                Statement stmt;
-                ResultSet rs;
-
-                // Get a Statement object
-                stmt = connection.createStatement();
-
-                // see if the book is checked out already
-                rs = stmt.executeQuery(GET_BORROW_BY_CONTENTS);
-
-                int borrowedCountBefore = 0;
-                ResultSetMetaData attributeNames = rs.getMetaData();
-                int columnsNumber = attributeNames.getColumnCount();
-                while (rs.next()) {
-                    for (int i = 1; i <= columnsNumber; i++) {
-                        /*
-                        if (i > 1) {
-                            System.out.print(",  ");
-                        }
-
-                        String columnValue = rs.getString(i);
-                        System.out.print(attributeNames.getColumnName(i) + " : " + columnValue);
-                        */
-                        borrowedCountBefore++;
-                    }
-                    System.out.println();
-                }
-
-                System.out.println(("Program beginning: BorrowedBy content at start of application: " + borrowedCountBefore));
-
-
                 Lab4_xml showXML = new Lab4_xml();
                 showXML.readXML ("/s/bach/a/class/cs430dl/Current/more_assignments/LabData/Libdata.xml");
                 ArrayList<BorrowedBy> borrowedByList = showXML.getBorrowedByArrayList();
 
                 for (BorrowedBy bb : borrowedByList) {
                     // 	If the transaction is a checkin, simply update the corresponding record appropriately
-                    System.out.println(("Check in date value: " + bb.getCheckin_date()));
+                    //System.out.println(("Check in date value: " + bb.getCheckin_date()));
                     if (!bb.getCheckin_date().equals(NOT_AVAILABLE_VALUE)) {
                         System.out.println(("Checking in book."));
                         checkInBook(connection, bb);
@@ -73,35 +30,6 @@ public class Lab4 {
                         checkOutBook(connection, bb);
                     }
                 }
-
-                System.out.println(("Program finished: BorrowedBy content at start of application:"));
-
-                // Get a Statement object
-                stmt = connection.createStatement();
-
-                // see if the book is checked out already
-                rs = stmt.executeQuery(GET_BORROW_BY_CONTENTS);
-
-                int borrowedCountAfter = 0;
-                attributeNames = rs.getMetaData();
-                columnsNumber = attributeNames.getColumnCount();
-                while (rs.next()) {
-                    for (int i = 1; i <= columnsNumber; i++) {
-                        /*
-                        if (i > 1) {
-                            System.out.print(",  ");
-                        }
-
-                        String columnValue = rs.getString(i);
-                        System.out.print(attributeNames.getColumnName(i) + " : " + columnValue);
-
-                         */
-                        borrowedCountAfter++;
-                    }
-                    System.out.println();
-                }
-
-                System.out.println(("Program beginning: BorrowedBy content at start of application: " + borrowedCountAfter));
 
             }catch( Exception e ) {
                 e.printStackTrace();
@@ -123,15 +51,13 @@ public class Lab4 {
             // Define URL of database server for
             // database named 'user' on the faure.
             String url =
-                    "jdbc:mysql://faure/dkielman";
+                    "jdbc:mysql://faure/dkielman?serverTimezone=UTC";
 
             // Get a connection to the database for a
             // user named 'user' with the password
             // 123456789.
             con = DriverManager.getConnection(
                     url, "dkielman", "832167848");
-
-
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -177,27 +103,22 @@ public class Lab4 {
             // see if there are copies available to check out first
             rs = stmt.executeQuery("SELECT total FROM StoredOn WHERE isbn = '" + borrowedBy.getIsbn() + "';");
 
-            if (!rs.next()) {
-                System.out.println("The book with the ISBN " + borrowedBy.getIsbn() + " is not present in the system with any copies.");
+            int totalCopies = 0;
+
+            while (rs.next()) {
+                totalCopies += rs.getInt("total");
+            }
+
+            //System.out.println("The book with the ISBN " + borrowedBy.getIsbn() + " has " + totalCopies + " available.");
+
+            if (totalCopies > 0) {
+                // Get a Statement object
+                stmt = connection.createStatement();
+                stmt.executeUpdate("INSERT INTO BorrowedBy VALUES ('" + borrowedBy.getIsbn() + "', '" + borrowedBy.getMember_id() + "', '" + borrowedBy.getCheckout_date() + "', '9999-01-01');");
+
+                System.out.println("The book with the ISBN " + borrowedBy.getIsbn() + " is now checked out");
             } else {
-
-                int totalCopies = 0;
-
-                while (rs.next()) {
-                    totalCopies += rs.getInt("total");
-                }
-
-                System.out.println("The book with the ISBN " + borrowedBy.getIsbn() + " has " + totalCopies + " available.");
-
-                if (totalCopies > 0) {
-                    // Get a Statement object
-                    stmt = connection.createStatement();
-                    stmt.executeUpdate("INSERT INTO BorrowedBy VALUES ('" + borrowedBy.getIsbn() + "', '" + borrowedBy.getMember_id() + "', '" + borrowedBy.getCheckout_date() + "', '9999-01-01');");
-
-                    System.out.println("The book with the ISBN " + borrowedBy.getIsbn() + " is now checked out");
-                } else {
-                    System.out.println("The book with the ISBN " + borrowedBy.getIsbn() + " does not have any available copies to check out at the moment.");
-                }
+                System.out.println("The book with the ISBN " + borrowedBy.getIsbn() + " does not have any available copies to check out at the moment.");
             }
 
         } catch( Exception e ) {

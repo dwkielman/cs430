@@ -63,7 +63,7 @@ public class Lab4_xml {
                     NodeList cod = codElmnt.getChildNodes();
                     //System.out.println("Checkout_date : "  + ((Node) cod.item(0)).getNodeValue().trim());
                     String xml_checkout_date = ((Node) cod.item(0)).getNodeValue().trim();
-                    System.out.println("Checkout_date : "  + xml_checkout_date);
+                    //System.out.println("Checkout_date : "  + xml_checkout_date);
 
                     if (!xml_checkout_date.equals(NOT_AVAILABLE_VALUE)) {
                         Date date_checkout = XML_DATE_FORMAT.parse(xml_checkout_date);
@@ -77,7 +77,7 @@ public class Lab4_xml {
                     NodeList cid = cidElmnt.getChildNodes();
                     //System.out.println("Checkin_date : "  + ((Node) cid.item(0)).getNodeValue().trim());
                     String xml_checkin_date = ((Node) cid.item(0)).getNodeValue().trim();
-                    System.out.println("Checkin_date : "  + xml_checkin_date);
+                    //System.out.println("Checkin_date : "  + xml_checkin_date);
 
                     if (!xml_checkin_date.equals(NOT_AVAILABLE_VALUE)) {
                         Date date_checkin = XML_DATE_FORMAT.parse(xml_checkin_date);
