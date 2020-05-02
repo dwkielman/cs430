@@ -6,6 +6,22 @@ public class Lab5View {
 
     private static final String[] SEARCH_OPTIONS = { "ISBN", "Name", "Author" };
 
+    public static int runLab4View() {
+
+        JPanel panel = new JPanel();
+        panel.add(new JLabel("Do you want to run the Lab 4 Initialization Commands?"));
+
+        int response = JOptionPane.showConfirmDialog(null, panel, "Lab 5 - Library Database", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE);
+
+        // 0=yes, 1=no
+        if (response == JOptionPane.CLOSED_OPTION) {
+            System.exit(0);
+        }
+
+        return response;
+
+    }
+
     public static int searchMemberIDView() {
 
         int memberID = -1;
@@ -15,11 +31,10 @@ public class Lab5View {
         panel.setLayout(new GridLayout(0,2));
         panel.add(new JLabel("Enter your Member ID:  "));
         panel.add(memberIDTextField);
-        int response = JOptionPane.showConfirmDialog(null, panel, "Lab 5 - Library Database", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        JFrame parent = new JFrame();
+        int response = JOptionPane.showConfirmDialog(null, panel, "Lab 5 - Library Database", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE);
 
-        if (response == JOptionPane.CANCEL_OPTION) {
-            // go to the add member page
-        } else if (response == JOptionPane.OK_OPTION) {
+        if (response == JOptionPane.OK_OPTION) {
             String userentry = memberIDTextField.getText();
             try {
                 memberID = Integer.parseInt(userentry);
@@ -59,6 +74,7 @@ public class Lab5View {
 
         if (response == JOptionPane.CANCEL_OPTION) {
             // go back to the main page
+            member.setMemberID(-1);
         } else if (response == JOptionPane.OK_OPTION) {
             String firstName = firstNameTextField.getText();
             String lastName = lastNameTextField.getText();
@@ -234,13 +250,23 @@ public class Lab5View {
         JPanel panel = new JPanel();
         panel.add(new JLabel(message));
 
-        int response = JOptionPane.showConfirmDialog(null, panel, "Lab 5 - Library Database: Book Information Results", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        int response = JOptionPane.showConfirmDialog(null, panel, "Lab 5 - Library Database: Book Information Results", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE);
 
         return response;
     }
 
     private static String cancelSelected() {
         return Protocol.CANCEL_SELECTION;
+    }
+
+    public static void errorMessageView(String message) {
+        JFrame parent = new JFrame();
+        JOptionPane.showMessageDialog(parent, message);
+    }
+
+    public static void displayNewMemberInformationView(Member member) {
+        JFrame parent = new JFrame();
+        JOptionPane.showMessageDialog(parent, "New Member added with Member ID: " + member.getMemberID());
     }
 
 }

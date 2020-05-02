@@ -6,8 +6,7 @@ public class Lab5 {
 
     public static void main(String args[]){
 
-        int setupFlag = Integer.parseInt(args[0]);
-        lab5Controller = new Lab5Controller(setupFlag);
+        lab5Controller = new Lab5Controller();
 
     }
 

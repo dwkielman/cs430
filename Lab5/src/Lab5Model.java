@@ -6,7 +6,6 @@ public class Lab5Model {
     private static final String NOT_AVAILABLE_VALUE = "N/A";
     private static Connection connection;
 
-    //public static void main(String args[]){
     public static void setupLab4(int setupFlag) {
 
         // connect to the SQL Server
@@ -14,7 +13,7 @@ public class Lab5Model {
 
         if (connection != null) {
 
-            if (setupFlag == 1) {
+            if (setupFlag == 0) {
                 // 	read in and parse the activity file in XML format
                 try {
                     Lab4_xml showXML = new Lab4_xml();
@@ -206,42 +205,50 @@ public class Lab5Model {
             // Get a Statement object
             stmt = connection.createStatement();
 
-            // add the member to the database
-            rs = stmt.executeQuery("SELECT total FROM StoredOn WHERE isbn = '" + isbn + "';");
+            // see if the title is even in the library
+            rs = stmt.executeQuery("SELECT title FROM Book WHERE isbn = '" + isbn + "';");
 
             if (!rs.next()) {
                 // book isn't available in any library
+                message += "<html>Sorry, this book does not appear to exist in the Library. Please try again.</html>";
             } else {
                 // see if there are copies available to check out first
-                //rs = stmt.executeQuery("SELECT total FROM StoredOn WHERE isbn = '" +isbn + "';");
-
                 int totalCopies = 0;
 
-                rs.beforeFirst();
-                while (rs.next()) {
-                    totalCopies += rs.getInt("total");
-                }
+                // get the total number of books available in all of the libraries
+                rs = stmt.executeQuery("SELECT total FROM StoredOn WHERE isbn = '" + isbn + "';");
 
-                rs = stmt.executeQuery("SELECT COUNT(isbn) FROM BorrowedBy WHERE isbn = '" + isbn + "' AND checkin_date = '9999-01-01';");
-
-                rs.next();
-                int loanedTotal = rs.getInt("COUNT(isbn)");
-
-                rs = stmt.executeQuery("SELECT title FROM Book WHERE isbn = '" + isbn + "';");
-                rs.next();
-                String bookTitle = rs.getString("title");
-
-                message += "<html>Book Title: " + bookTitle + "<br><br>";
-
-                if (totalCopies > loanedTotal) {
-                   // If the libraries have the book and there are copies available, the program should print a message telling the member what library and shelf the book is on (there may be more than one).
-                    rs = stmt.executeQuery("SELECT lib_name, s_number FROM StoredOn WHERE isbn = '" + isbn + "';");
-                    while (rs.next()) {
-                        message += "Library Name: " + rs.getString("lib_name") + ", located on Shelf Number: " + rs.getInt("s_number") + "<br>";
-                    }
-                    message += "Total Available Copies: " + (totalCopies - loanedTotal) + "</html>";
+                // book is in library, but no copies are available
+                if (!rs.next()) {
+                    message += "<html>Sorry, there are currently no copies available of your book at any of our libraries.</html>";
                 } else {
-                    message += "Sorry, there are currently no copies available at any of our libraries.</html>";
+
+                    rs.beforeFirst();
+                    while (rs.next()) {
+                        totalCopies += rs.getInt("total");
+                    }
+
+                    rs = stmt.executeQuery("SELECT COUNT(isbn) FROM BorrowedBy WHERE isbn = '" + isbn + "' AND checkin_date = '9999-01-01';");
+
+                    rs.next();
+                    int loanedTotal = rs.getInt("COUNT(isbn)");
+
+                    rs = stmt.executeQuery("SELECT title FROM Book WHERE isbn = '" + isbn + "';");
+                    rs.next();
+                    String bookTitle = rs.getString("title");
+
+                    message += "<html>Book Title: " + bookTitle + "<br><br>";
+
+                    if (totalCopies > loanedTotal) {
+                        // If the libraries have the book and there are copies available, the program should print a message telling the member what library and shelf the book is on (there may be more than one).
+                        rs = stmt.executeQuery("SELECT lib_name, s_number FROM StoredOn WHERE isbn = '" + isbn + "';");
+                        while (rs.next()) {
+                            message += "Library Name: " + rs.getString("lib_name") + ", located on Shelf Number: " + rs.getInt("s_number") + "<br>";
+                        }
+                        message += "Total Available Copies: " + (totalCopies - loanedTotal) + "</html>";
+                    } else {
+                        message += "Sorry, all books are currently loaned out.</html>";
+                    }
                 }
             }
 
